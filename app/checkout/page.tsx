@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCartStore } from "@/store/cart-store";
 import { checkoutAction } from "./checkout-action";
-import { ShoppingCart, Minus, Plus, CreditCard } from "lucide-react";
+import { ShoppingCart, Minus, Plus, CreditCard, Loader2 } from "lucide-react";
 
 export default function CheckoutPage() {
   const { items, removeItem, addItem } = useCartStore();
@@ -12,6 +13,9 @@ export default function CheckoutPage() {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
+
+  // 🔹 Loading state for checkout
+  const [isLoading, setIsLoading] = useState(false);
 
   if (items.length === 0) {
     return (
@@ -28,6 +32,15 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  const handleCheckout = async (formData: FormData) => {
+    try {
+      setIsLoading(true);
+      await checkoutAction(formData); // your server action
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-gradient-to-br from-indigo-50 to-blue-50 min-h-screen py-12 px-4">
@@ -87,20 +100,29 @@ export default function CheckoutPage() {
         </CardContent>
       </Card>
 
-      <form action={checkoutAction} className="max-w-2xl mx-auto mt-8">
+      <form action={handleCheckout} className="max-w-2xl mx-auto mt-8">
         <input type="hidden" name="items" value={JSON.stringify(items)} />
         <Button
           type="submit"
-          variant="default"
+          disabled={isLoading}
           className="
             w-full py-4 text-lg font-semibold 
             bg-gradient-to-r from-blue-500 to-indigo-500 
             hover:from-blue-600 hover:to-indigo-600 
-            rounded-xl shadow-lg hover:shadow-xl transition-all
+            rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer
           "
         >
-          <CreditCard className="mr-2 h-5 w-5" />
-          Proceed to Payment
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <CreditCard className="mr-2 h-5 w-5" />
+              Proceed to Payment
+            </>
+          )}
         </Button>
       </form>
     </div>
