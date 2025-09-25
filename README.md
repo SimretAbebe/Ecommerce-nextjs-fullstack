@@ -38,5 +38,3 @@ This project delivers a sleek, responsive frontend and a secure payment flow —
 
 ---
 
-git clone https://github.com/your-username/your-ecommerce-project.git
-cd your-ecommerce-project
